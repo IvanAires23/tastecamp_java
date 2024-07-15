@@ -2,12 +2,17 @@ package com.tastecamp.api.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tastecamp.api.dtos.RecipeDTO;
 import com.tastecamp.api.models.RecipeModel;
-import com.tastecamp.api.repositories.RecipeRepository;
+import com.tastecamp.api.service.RecipeService;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,42 +29,56 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/recipes")
 public class RecipeController {
 
-    final RecipeRepository recipeRepository;
+    final RecipeService recipeService;
 
-    RecipeController(RecipeRepository recipeRepository){
-        this.recipeRepository = recipeRepository;   
+    RecipeController(RecipeService recipeService){
+        this.recipeService = recipeService;   
     }
 
     @GetMapping
-    public List<RecipeModel> getRecipes(){
-        return recipeRepository.findAll();
+    public ResponseEntity<List<RecipeModel>> getRecipes(){
+        List<RecipeModel> recipes = recipeService.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(recipes);
 
     }
 
     @GetMapping("/{id}")
-    public Optional<RecipeModel> getRecipeById(@PathVariable Long id){
-        Optional<RecipeModel> recipe = recipeRepository.findById(id);
+    public ResponseEntity<Object> getRecipeById(@PathVariable Long id){
+        Optional<RecipeModel> recipe = recipeService.findById(id);
 
         if(!recipe.isPresent()){
-            return Optional.empty();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não encontrado");
         }
 
-        return recipe;
+        return ResponseEntity.status(HttpStatus.OK).body(recipe);
     }
 
     @PostMapping
-    public String createRecipe(@RequestBody String body) {        
-        return body;
+    public ResponseEntity<Object> createRecipe(@RequestBody @Valid RecipeDTO body) { 
+        Optional<RecipeModel> recipe = recipeService.save(body);
+        
+        if(!recipe.isPresent()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Titulo já existe");
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.save(body));
     }
 
     @PutMapping("/{id}")
-    public String updateRecipe(@PathVariable Long id, @RequestBody String body){
-        return body + id;
+    public ResponseEntity<Object> updateRecipe(@PathVariable Long id, @RequestBody RecipeDTO body){
+        Optional<RecipeModel> recipe = recipeService.findById(id);
+
+        if(!recipe.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não encontrado");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.update(body, id));
     }
 
     @DeleteMapping
-    public String deleteRecipe(@PathVariable Long id){
-        return "Receita deletada"+id;
+    public ResponseEntity<Void> deleteRecipe(@PathVariable Long id){
+        recipeService.deleteRecipe(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     
 }

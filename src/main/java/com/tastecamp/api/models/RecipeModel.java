@@ -1,5 +1,7 @@
 package com.tastecamp.api.models;
 
+import com.tastecamp.api.dtos.RecipeDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,12 +12,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "recipes")
+@Data                 //Getters e Setters
+@NoArgsConstructor    // Construtor sem argumentos 
+@AllArgsConstructor   // Construtor com todos os argumentos
+@Entity               // Representa que é uma entidade a ser mapeado no BD
+@Table(name = "recipes") // Nome da tabela no banco de dados
 public class RecipeModel {
+
+    public RecipeModel(RecipeDTO dto){
+        this.title = dto.getTitle();
+        this.steps = dto.getSteps();
+        this.ingredients = dto.getIngredients();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
