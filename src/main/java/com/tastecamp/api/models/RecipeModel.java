@@ -12,7 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-//anotations
 @Data                 //Getters e Setters
 @NoArgsConstructor    // Construtor sem argumentos 
 @AllArgsConstructor   // Construtor com todos os argumentos
